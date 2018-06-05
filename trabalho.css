@@ -1,0 +1,27 @@
+html, body {
+    padding: 0;
+    margin: 0;
+}
+
+.top_section {
+    background-image: url("pexels-photo-88212.jpeg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: relative;
+    width: 100%;
+    height: 150px;
+    margin: 0;
+}
+
+.bottom_section {
+    text-align: center;
+}
+
+.container {
+    display: inline-block;
+    margin: auto;
+    position: absolute;
+    top: 5%;
+    left: 25%;
+    padding: 15px;
+}
