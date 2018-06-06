@@ -25,3 +25,19 @@ html, body {
     left: 25%;
     padding: 15px;
 }
+
+.lista {
+    margin-bottom: 15px;
+    padding: 10px;
+    clear:both;
+}
+
+.left, .center, .right{
+    float:left;
+    width:30%;
+    height: 200px;
+    border:1px solid black; 
+    margin-right: 10px;
+    margin-left: 10px;
+    padding:5px;
+}

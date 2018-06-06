@@ -5,6 +5,7 @@ const autenticador = "Esturbilho";
 
 // Elementos do html
 var idTextSearch, idSearchButton, idNearbyButton, idBottomSection, idSubTitulo;
+var evaluator;
 var failed = false;
 
 function $(id) {
@@ -20,6 +21,8 @@ function $(id) {
 }
 
 function boot() {
+    evaluator = new XPathEvaluator();
+
     idTextSearch = $("textSearch");
     idSearchButton = $("searchButton");
     idNearbyButton = $("nearbyButton");
@@ -31,7 +34,7 @@ function boot() {
     }
 
     idNearbyButton.onclick = function () {
-
+        sendRequest("nearby", undefined, undefined);
     }
 }
 
@@ -51,17 +54,36 @@ function sendRequest(service, key1, key2) {
     console.log(key1);
     var xmlhttp = new XMLHttpRequest();
     var url;
-    key2 === undefined ? url = "http://api.geonames.org/" + service + "?name=" +
-        key1 + "&username=" + autenticador : url = "http://api.geonames.org/" + service +
-        "?lat=" + key1 + "&lng=" + key2 + "&username=" + autenticador;
+    switch (service) {
+        case "search":
+            url = "http://api.geonames.org/" + service + "?name=" +
+                key1 + "&username=" + autenticador;
+            break;
+        case "findNearbyPOIsOSM":
+            url = "http://api.geonames.org/" + service +
+                "?lat=" + key1 + "&lng=" + key2 + "&username=" + autenticador;
+            break;
+        case "nearby":
+            url = "http://ip-api.com/xml";
+            break;
+    }
     console.log(url);
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            if (key2 === undefined) idSubTitulo.innerHTML = "Resultados da pesquisa para: " + key1;
             idTextSearch.value = "";
             var divTexto = document.createElement("div");
-            service === "search" ? checkCoords(tratarDadosXML(xmlhttp.responseText)) :
-                showData(tratarDadosXML(xmlhttp.responseText))
+            switch (service) {
+                case "search":
+                    idSubTitulo.innerHTML = "Resultados da pesquisa para: " + key1;
+                    checkCoords(tratarDadosXML(xmlhttp.responseText));
+                    break;
+                case "findNearbyPOIsOSM":
+                    showData(tratarDadosXML(xmlhttp.responseText));
+                    break;
+                case "nearby":
+                    showNearby(tratarDadosXML(xmlhttp.responseText));
+                    break;
+            }
             idBottomSection.appendChild(divTexto);
         }
     }
@@ -71,14 +93,13 @@ function sendRequest(service, key1, key2) {
 
 function checkCoords(DOMDoc) {
     if (navigator.userAgent.indexOf('NET') == -1) { // verifica se se trata de um browser diferente do IE
-        var evaluator = new XPathEvaluator();
-        var lat = evaluator.evaluate("//lat/child::text()", DOMDoc, null,
+        var latitude = evaluator.evaluate("//lat/child::text()", DOMDoc, null,
             XPathResult.STRING_TYPE, null);
-        console.log(lat.stringValue);
-        var lng = evaluator.evaluate("//lng/child::text()", DOMDoc, null,
+        console.log(latitude.stringValue);
+        var longitude = evaluator.evaluate("//lng/child::text()", DOMDoc, null,
             XPathResult.STRING_TYPE, null);
-        console.log(lng.stringValue);
-        sendRequest("findNearbyPOIsOSM", lat.stringValue, lng.stringValue);
+        console.log(longitude.stringValue);
+        sendRequest("findNearbyPOIsOSM", latitude.stringValue, longitude.stringValue);
     } else {
 
     }
@@ -90,4 +111,30 @@ function showData(DOMDoc) {
     } else {
 
     }
+}
+
+function showNearby(DOMDoc) {
+    if (navigator.userAgent.indexOf('NET') == -1) { // verifica se se trata de um browser diferente do IE
+        var latitude = evaluator.evaluate("//lat/child::text()", DOMDoc, null,
+            XPathResult.STRING_TYPE, null);
+        console.log(latitude.stringValue);
+        var longitude = evaluator.evaluate("//lon/child::text()", DOMDoc, null,
+            XPathResult.STRING_TYPE, null);
+        console.log(longitude.stringValue);
+        sendRequest("findNearbyPOIsOSM", latitude.stringValue, longitude.stringValue);
+    } else {
+
+    }
+}
+
+function newContent(){
+    var linha = document.createElement("div");
+    var left = document.createElement("div");
+    var center = document.createElement("div");
+    var right = document.createElement("div");
+    linha.appendChild(left);
+    linha.appendChild(center);
+    linha.appendChild(right);
+    idBottomSection.appendChild(linha);
+    return [left, center, right];
 }
